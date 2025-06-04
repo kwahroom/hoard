@@ -19,8 +19,14 @@
   <input id="user-input" type="text" style="width: 400px;" autocomplete="off" placeholder="Type the sentence here" disabled />
   <div id="result"></div>
 
+  <h3>Upload a JSON file with sentences:</h3>
+  <input id="file-input" type="file" accept=".json" />
+  <div id="sentence-progress" style="margin-top: 10px;">Sentence 0 of 0</div>
+
   <script>
     let words = [];
+    let sentences = [];
+    let currentSentenceIndex = 0;
     let pyodideReadyPromise = loadPyodide();
 
     function renderSentence(statuses = []) {
@@ -32,6 +38,23 @@
         span.className = "word " + (statuses[idx] || "");
         container.appendChild(span);
       });
+    }
+
+    function updateProgress() {
+      const progress = document.getElementById("sentence-progress");
+      progress.textContent = `Sentence ${currentSentenceIndex + 1} of ${sentences.length}`;
+    }
+
+    function loadNextSentence() {
+      if (currentSentenceIndex >= sentences.length) {
+        alert("All sentences completed!");
+        document.getElementById("user-input").disabled = true;
+        return;
+      }
+      const sentence = sentences[currentSentenceIndex];
+      document.getElementById("sentence-input").value = sentence;
+      document.getElementById("set-sentence").click();
+      updateProgress();
     }
 
     // Set sentence button handler
@@ -75,7 +98,30 @@ for uw, tw in zip(user_words, target_words):
       renderSentence(statuses);
 
       const allCorrect = statuses.every(s => s === "correct");
-      document.getElementById("result").textContent = allCorrect ? "✅ All correct!" : "";
+      if (allCorrect) {
+        document.getElementById("result").textContent = "✅ All correct!";
+        currentSentenceIndex++;
+        setTimeout(loadNextSentence, 1000); // Load next sentence after a short delay
+      }
+    });
+
+    // Handle file upload
+    document.getElementById("file-input").addEventListener("change", function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          sentences = JSON.parse(e.target.result);
+          if (!Array.isArray(sentences)) throw new Error("Invalid JSON format");
+          currentSentenceIndex = 0;
+          loadNextSentence();
+        } catch (error) {
+          alert("Failed to load sentences: " + error.message);
+        }
+      };
+      reader.readAsText(file);
     });
 
     // Optionally, set a default sentence on load
