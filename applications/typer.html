@@ -9,19 +9,29 @@
     .correct { color: #888; background: #eee; }
     .incorrect { color: #fff; background: #e74c3c; border-color: #c0392b; }
     .pending { color: #222; background: #fffbe7; border-color: #f1c40f; }
+    .container { display: flex; gap: 20px; }
+    .left-panel, .right-panel { flex: 1; }
+    .right-panel { border-left: 1px solid #ccc; padding-left: 20px; }
   </style>
 </head>
 <body>
-  <h3>Enter the sentence to check:</h3>
-  <input id="sentence-input" type="text" style="width: 400px;" autocomplete="off" placeholder="Type your sentence here" />
-  <button id="set-sentence">Set Sentence</button>
-  <div id="target-sentence"></div>
-  <input id="user-input" type="text" style="width: 400px;" autocomplete="off" placeholder="Type the sentence here" disabled />
-  <div id="result"></div>
+  <div class="container">
+    <div class="left-panel">
+      <h3>Type the sentence here:</h3>
+      <div id="target-sentence" style="margin-bottom: 10px;"></div>
+      <input id="user-input" type="text" style="width: 100%;" autocomplete="off" placeholder="Type the sentence here" disabled />
+    </div>
+    <div class="right-panel">
+      <h3>Enter the sentence to check:</h3>
+      <input id="sentence-input" type="text" style="width: 100%;" autocomplete="off" placeholder="Type your sentence here" />
+      <button id="set-sentence">Set Sentence</button>
+      <div id="result" style="margin-top: 10px;"></div>
 
-  <h3>Upload a JSON file with sentences:</h3>
-  <input id="file-input" type="file" accept=".json" />
-  <div id="sentence-progress" style="margin-top: 10px;">Sentence 0 of 0</div>
+      <h3 style="margin-top: 20px;">Upload a JSON file with sentences:</h3>
+      <input id="file-input" type="file" accept=".json" />
+      <div id="sentence-progress" style="margin-top: 10px;">Sentence 0 of 0</div>
+    </div>
+  </div>
 
   <script>
     let words = [];
