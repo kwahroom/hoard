@@ -57,14 +57,16 @@
 
     function loadNextSentence() {
       if (currentSentenceIndex >= sentences.length) {
-        alert("All sentences completed!");
-        document.getElementById("user-input").disabled = true;
-        return;
+        document.getElementById("user-input").value = ""; // Clear the text area
+        currentSentenceIndex = 0; // Reset to the first sentence
       }
-      const sentence = sentences[currentSentenceIndex];
-      document.getElementById("sentence-input").value = sentence;
-      document.getElementById("set-sentence").click();
-      updateProgress();
+      if (sentences.length > 0) {
+        const sentence = sentences[currentSentenceIndex];
+        
+        document.getElementById("sentence-input").value = sentence;
+        document.getElementById("set-sentence").click();
+        updateProgress();
+      }
     }
 
     // Set sentence button handler
