@@ -1,0 +1,5 @@
+
+# Typer
+
+* update site to support loading a json with sentences. Go through each sentence one by one. You have to type it out.
+* Loop again once you go to the last one

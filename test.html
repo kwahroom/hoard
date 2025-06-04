@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Per-Word Sentence Checker with Pyodide</title>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.27.6/full/pyodide.js"></script>
+  <style>
+    .word { padding: 2px 4px; margin: 2px; border-radius: 4px; border: 1px solid transparent; }
+    .correct { color: #888; background: #eee; }
+    .incorrect { color: #fff; background: #e74c3c; border-color: #c0392b; }
+    .pending { color: #222; background: #fffbe7; border-color: #f1c40f; }
+  </style>
+</head>
+<body>
+  <h3>Enter the sentence to check:</h3>
+  <input id="sentence-input" type="text" style="width: 400px;" autocomplete="off" placeholder="Type your sentence here" />
+  <button id="set-sentence">Set Sentence</button>
+  <div id="target-sentence"></div>
+  <input id="user-input" type="text" style="width: 400px;" autocomplete="off" placeholder="Type the sentence here" disabled />
+  <div id="result"></div>
+
+  <script>
+    let words = [];
+    let pyodideReadyPromise = loadPyodide();
+
+    function renderSentence(statuses = []) {
+      const container = document.getElementById("target-sentence");
+      container.innerHTML = "";
+      words.forEach((word, idx) => {
+        const span = document.createElement("span");
+        span.textContent = word + (idx < words.length - 1 ? " " : "");
+        span.className = "word " + (statuses[idx] || "");
+        container.appendChild(span);
+      });
+    }
+
+    // Set sentence button handler
+    document.getElementById("set-sentence").addEventListener("click", function() {
+      const sentenceField = document.getElementById("sentence-input");
+      const sentence = sentenceField.value.trim();
+      if (!sentence) {
+        alert("Please enter a sentence.");
+        return;
+      }
+      words = sentence.split(/\s+/);
+      renderSentence();
+      document.getElementById("user-input").value = "";
+      document.getElementById("result").textContent = "";
+      document.getElementById("user-input").disabled = false;
+      document.getElementById("user-input").focus();
+    });
+
+    // On user input, check each word
+    document.getElementById("user-input").addEventListener("input", async function () {
+      let userInput = this.value;
+      let userWords = userInput.trim().split(/\s+/);
+      // Pad userWords to match length of target words
+      while (userWords.length < words.length) userWords.push("");
+      let pyodide = await pyodideReadyPromise;
+      pyodide.globals.set("user_words", userWords);
+      pyodide.globals.set("target_words", words);
+
+      let pyCode = `
+statuses = []
+for uw, tw in zip(user_words, target_words):
+    if not uw:
+        statuses.append("pending")
+    elif uw == tw:
+        statuses.append("correct")
+    else:
+        statuses.append("incorrect")
+`;
+      pyodide.runPython(pyCode);
+      let statuses = pyodide.globals.get("statuses").toJs();
+      renderSentence(statuses);
+
+      const allCorrect = statuses.every(s => s === "correct");
+      document.getElementById("result").textContent = allCorrect ? "✅ All correct!" : "";
+    });
+
+    // Optionally, set a default sentence on load
+    window.onload = function() {
+      document.getElementById("sentence-input").value = "The quick brown fox jumps over the lazy dog.";
+      document.getElementById("set-sentence").click();
+    };
+  </script>
+</body>
+</html>
