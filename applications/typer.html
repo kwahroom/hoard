@@ -98,7 +98,7 @@
       if (allCorrect) {
         document.getElementById("result").textContent = "✅ All correct!";
         currentSentenceIndex++;
-        setTimeout(loadNextSentence, 1000); // Load next sentence after a short delay
+        loadNextSentence(); // Remove the setTimeout to transition immediately
       }
     });
 
