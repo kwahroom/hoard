@@ -2,8 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Per-Word Sentence Checker with Pyodide</title>
-  <script src="https://cdn.jsdelivr.net/pyodide/v0.27.6/full/pyodide.js"></script>
+  <title>Per-Word Sentence Checker</title>
   <style>
     .word { padding: 2px 4px; margin: 2px; border-radius: 4px; border: 1px solid transparent; }
     .correct { color: #888; background: #eee; }
@@ -37,7 +36,6 @@
     let words = [];
     let sentences = [];
     let currentSentenceIndex = 0;
-    let pyodideReadyPromise = loadPyodide();
 
     function renderSentence(statuses = []) {
       const container = document.getElementById("target-sentence");
@@ -62,7 +60,6 @@
       }
       if (sentences.length > 0) {
         const sentence = sentences[currentSentenceIndex];
-        
         document.getElementById("sentence-input").value = sentence;
         document.getElementById("set-sentence").click();
         updateProgress();
@@ -86,30 +83,18 @@
     });
 
     // On user input, check each word
-    document.getElementById("user-input").addEventListener("input", async function () {
-      let userInput = this.value;
-      let userWords = userInput.trim().split(/\s+/);
-      // Pad userWords to match length of target words
-      while (userWords.length < words.length) userWords.push("");
-      let pyodide = await pyodideReadyPromise;
-      pyodide.globals.set("user_words", userWords);
-      pyodide.globals.set("target_words", words);
+    document.getElementById("user-input").addEventListener("input", function () {
+      const userInput = this.value.trim();
+      const userWords = userInput.split(/\s+/);
 
-      let pyCode = `
-statuses = []
-for uw, tw in zip(user_words, target_words):
-    if not uw:
-        statuses.append("pending")
-    elif uw == tw:
-        statuses.append("correct")
-    else:
-        statuses.append("incorrect")
-`;
-      pyodide.runPython(pyCode);
-      let statuses = pyodide.globals.get("statuses").toJs();
+      const statuses = words.map((word, idx) => {
+        if (!userWords[idx]) return "pending";
+        return userWords[idx] === word ? "correct" : "incorrect";
+      });
+
       renderSentence(statuses);
 
-      const allCorrect = statuses.every(s => s === "correct");
+      const allCorrect = statuses.every(status => status === "correct");
       if (allCorrect) {
         document.getElementById("result").textContent = "✅ All correct!";
         currentSentenceIndex++;
