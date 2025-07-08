@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Per-Word Text Checker</title>
+  <style>
+    .word { padding: 2px 4px; margin: 2px; border-radius: 4px; border: 1px solid transparent; }
+    .correct { color: #888; background: #eee; }
+    .incorrect { color: #fff; background: #e74c3c; border-color: #c0392b; }
+    .pending { color: #222; background: #fffbe7; border-color: #f1c40f; }
+    .container { display: flex; gap: 20px; }
+    .left-panel, .right-panel { flex: 1; }
+    .right-panel { border-left: 1px solid #ccc; padding-left: 20px; }
+    .text-display { 
+      background: #f9f9f9; 
+      padding: 15px; 
+      border-radius: 8px; 
+      margin-bottom: 15px;
+      line-height: 1.6;
+      border: 1px solid #ddd;
+    }
+    select { 
+      width: 100%; 
+      padding: 8px; 
+      margin-bottom: 10px; 
+      border: 1px solid #ccc; 
+      border-radius: 4px; 
+    }
+    footer {
+      margin-top: 40px;
+      padding: 20px 0;
+      border-top: 1px solid #ddd;
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+    }
+    footer a {
+      color: #3498db;
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="left-panel">
+      <h3>Type the text here:</h3>
+      <div id="target-sentence" class="text-display"></div>
+      <input id="user-input" type="text" style="width: 100%;" autocomplete="off" placeholder="Type the text here" disabled />
+    </div>
+    <div class="right-panel">
+      <h3>Select a text to practice:</h3>
+      <select id="text-selector">
+        <option value="">Choose a text...</option>
+        <option value="the-great-gatsby">The Great Gatsby</option>
+        <option value="lorem">Lorem Ipsum</option>
+        <option value="shakespeare">Shakespeare Quote</option>
+        <option value="typing-test">Typing Test Paragraph</option>
+      </select>
+      <div id="full-text-display" class="text-display" style="display: none;">
+        <h4>Full Text:</h4>
+        <div id="full-text-content"></div>
+      </div>
+      <div id="result" style="margin-top: 10px;"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Inspired by copywork practice. Learn more: <a href="https://herbertlui.net/write-better-faster-with-copywork/" target="_blank">Write Better, Faster with Copywork</a></p>
+  </footer>
+
+  <script>
+    let words = [];
+    const predefinedTexts = {
+      "the-great-gatsby": `We went in. To my overwhelming surprise the living-room was deserted.
+'Well, that's funny,' I exclaimed.
+'What's funny?'
+She turned her head as there was a light dignified knocking at the front door. I
+went out and opened it. Gatsby, pale as death, with his hands plunged like
+weights in his coat pockets, was standing in a puddle of water glaring tragically
+into my eyes.
+With his hands still in his coat pockets he stalked by me into the hall, turned
+sharply as if he were on a wire, and disappeared into the living-room. It wasn't a
+bit funny. Aware of the loud beating of my own heart I pulled the door to against
+the increasing rain.
+For half a minute there wasn't a sound. Then from the living-room I heard a sort
+of choking murmur and part of a laugh, followed by Daisy's voice on a clear
+artificial note:
+'I certainly am awfully glad to see you again.'
+A pause; it endured horribly. I had nothing to do in the hall, so I went into the
+room.
+Gatsby, his hands still in his pockets, was reclining against the mantelpiece in a
+strained counterfeit of perfect ease, even of boredom. His head leaned back so
+far that it rested against the face of a defunct mantelpiece clock, and from this
+position his distraught eyes stared down at Daisy, who was sitting, frightened
+but graceful, on the edge of a stiff chair.`,
+      "lorem": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.",
+      "shakespeare": "To be or not to be, that is the question. Whether 'tis nobler in the mind to suffer the slings and arrows of outrageous fortune, or to take arms against a sea of troubles.",
+      "typing-test": "The five boxing wizards jump quickly. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump! Bright vixens jump; dozy fowl quack."
+    };
+
+    function renderSentence(statuses = []) {
+      const container = document.getElementById("target-sentence");
+      container.innerHTML = "";
+      words.forEach((word, idx) => {
+        const span = document.createElement("span");
+        span.textContent = word + (idx < words.length - 1 ? " " : "");
+        span.className = "word " + (statuses[idx] || "");
+        container.appendChild(span);
+      });
+    }
+
+    // Text selector handler
+    document.getElementById("text-selector").addEventListener("change", function() {
+      const selectedKey = this.value;
+      if (!selectedKey) {
+        document.getElementById("full-text-display").style.display = "none";
+        document.getElementById("user-input").disabled = true;
+        return;
+      }
+      
+      const selectedText = predefinedTexts[selectedKey];
+      document.getElementById("full-text-content").textContent = selectedText;
+      document.getElementById("full-text-display").style.display = "block";
+      
+      words = selectedText.split(/\s+/);
+      renderSentence();
+      document.getElementById("user-input").value = "";
+      document.getElementById("result").textContent = "";
+      document.getElementById("user-input").disabled = false;
+      document.getElementById("user-input").focus();
+    });
+
+    // On user input, check each word
+    document.getElementById("user-input").addEventListener("input", function () {
+      const userInput = this.value.trim();
+      const userWords = userInput.split(/\s+/);
+
+      const statuses = words.map((word, idx) => {
+        if (!userWords[idx]) return "pending";
+        return userWords[idx] === word ? "correct" : "incorrect";
+      });
+
+      renderSentence(statuses);
+
+      const allCorrect = statuses.every(status => status === "correct");
+      if (allCorrect) {
+        document.getElementById("result").textContent = "✅ All correct! Well done!";
+      }
+    });
+
+    // Set default text on load
+    window.onload = function() {
+      document.getElementById("text-selector").value = "quick-fox";
+      document.getElementById("text-selector").dispatchEvent(new Event('change'));
+    };
+  </script>
+</body>
+</html>
