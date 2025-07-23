@@ -1,0 +1,44 @@
+[
+    {
+        "name": "Algoritmen",
+        "url": "https://feeds.ur.se/rss/pod/Algoritmen-133.xml",
+        "labels": ["podcast", "technology"],
+        "language": "svenska"
+    },
+    {
+        "name": "Säkerhetpodcasten",
+        "url": "https://sakerhetspodcasten.se/index.xml",
+        "labels": ["podcast", "technology"],
+        "language": "svenska"
+    },
+    {
+        "name": "Vi spelar Rolspel",
+        "url": "https://www.vispelarrollspel.se/feed/podcast/",
+        "labels": ["podcast", "role-playing"],
+        "language": "svenska"
+    },
+    {
+        "name": "Herbert Lui Blog",
+        "url": "https://herbertlui.net/feed/",
+        "labels": ["blog", "technology"],
+        "language": "english"
+    },
+    {
+        "name": "Xeiaso Blog",
+        "url": "https://xeiaso.net/blog.rss",
+        "labels": ["blog", "technology"],
+        "language": "english"
+    },
+    {
+        "name": "Maskray Blog",
+        "url": "https://maskray.me/blog/atom.xml",
+        "labels": ["blog", "technology", "linkers", "compilers"],
+        "language": "english"
+    },
+    {
+        "name": "Ploum Blog",
+        "url": "https://ploum.net/atom.xml",
+        "labels": ["blog", "technology"],
+        "language": "français"
+    }
+]
